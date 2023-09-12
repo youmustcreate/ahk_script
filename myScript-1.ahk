@@ -58,11 +58,11 @@ CapsLock::^1
 
 
 #HotIf WinActive("ahk_exe chrome.exe")
-F6::
+PgDn::
 {
 SendInput "^{Tab}"
 }
-F5::
+PgUp::
 {
 SendInput "^+{Tab}"
 }
