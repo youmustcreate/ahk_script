@@ -44,10 +44,7 @@ PrintScreen::
 }
 
 
-RControl::{
-    SendInput "^f"
 
-}
 
 
 
@@ -66,7 +63,7 @@ PgUp::
 {
 SendInput "^+{Tab}"
 }
-F7::
+RControl::
 {
 SendInput "^w"
 }
@@ -121,6 +118,9 @@ SendInput "^u"
 
 
 #HotIf WinActive("ahk_exe code.exe")
+RControl::{
+    SendInput "^f"
+}
 PgUp::
 {
     SendInput "{Shift down}{Enter}{Shift up}"
