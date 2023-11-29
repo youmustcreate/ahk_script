@@ -2,32 +2,39 @@
 
 SendMode "Input"
 
-F1::
-    {
-        SendInput "^c"
-    }
+F1::{
+    SendInput "^c"  ; 复制
+}
 
-F2::
-    {
-        SendInput "^v"
-    }
+F2::{
+    SendInput "^v"  ; 粘贴
+}
 
-F3::
-    {
-        SendInput "{Alt down}{Tab}{Alt up}"
-    }
+F3::{
+    SendInput "{Alt down}{Tab}{Alt up}"   ; 上一个任务
+}
+
+F4::^a  ; 
 
 
-F4::^x
-
-F8::{
-    SendInput "^x"
+F5::{
+    SendInput "^!{Tab}"    ; 多任务
 }
 
 
 RAlt::{
-    run "c.exe"
+    run "c.exe"   ; 全屏
 }
+
+
+; Del::
+; {
+; SendInput "{Del 30}"
+; }
+
+
+
+MButton::^f   ; 
 
 
 ; MButton::
@@ -40,18 +47,13 @@ RAlt::{
 
 PrintScreen::
 {
-    SendInput "#+s"
+    SendInput "#+s"   ; 截图
 }
 
 
-
-
-
-
 +CapsLock::CapsLock
-CapsLock::^1
-
-
+; CapsLock::^1          ; 
+CapsLock::LButton     ; 
 
 
 #HotIf WinActive("ahk_exe chrome.exe")
@@ -67,14 +69,18 @@ RControl::
 {
 SendInput "^w"
 }
-F8::
+
+F11::
 {
-SendInput "^t"      ;打开新的标签页，并跳转到该标签页
+SendText "请帮我解释一下这是什么意思："
 }
+
+F12::
+{
+SendInput "作为翻译大师，请帮我翻译一下："
+}
+
 #HotIf
-
-
-
 
 
 
@@ -104,16 +110,12 @@ SendInput "{- 3}`n`n"
 {
 SendInput "{`n 20}"
 }
-F6::
+F5::
 {
-SendInput "^u"
+SendInput "^!c"
 }
+; F4::Backspace
 #HotIf ; 这里让后续的重映射和热键对所有窗口生效.
-
-
-
-
-
 
 
 
@@ -134,10 +136,21 @@ PgDn::{
 #HotIf WinActive("ahk_exe pycharm64.exe")
 PgDn::
 {
-    SendInput "F8"
+    SendInput "{F8}"
 }
 PgUp::{
-    SendInput "^F5"
+    SendInput "{^F5}"
+}
+#HotIf
+
+
+#HotIf WinActive("ahk_exe clion64.exe")
+PgDn::
+{
+    SendInput "{F8}"
+}
+PgUp::{
+    SendInput "+{F9}"
 }
 #HotIf
 
@@ -196,11 +209,6 @@ KeyWinD(ThisHotkey)  ; 命名的函数热键.   双击alt 返回桌面
 
 
 
-
-
-
-
-
 CoordMode "Mouse", "Screen"
 
 
@@ -218,7 +226,7 @@ Loop
       EWD_Triggered := true  
     }
   }
-  Else IF(EWD_MouseStartX <= 1 && EWD_MouseStartY >= A_ScreenHeight -1 )
+  Else IF(EWD_MouseStartX <= 1 && EWD_MouseStartY <= 1 )
   {
     If (!EWD_Triggered)
     {
