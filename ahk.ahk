@@ -14,7 +14,8 @@ F3::{
     SendInput "{Alt down}{Tab}{Alt up}"   ; 上一个任务
 }
 
-F4::^a  ; 
+F4::^f  ; 
+MButton::^a   ; 
 
 
 F5::{
@@ -29,12 +30,11 @@ RAlt::{
 
 ; Del::
 ; {
-; SendInput "{Del 30}"
+; SendInput "{Del 100}"
 ; }
 
 
 
-MButton::^f   ; 
 
 
 ; MButton::
@@ -52,8 +52,13 @@ PrintScreen::
 
 
 +CapsLock::CapsLock
-; CapsLock::^1          ; 
-CapsLock::LButton     ; 
+
+CapsLock::{
+    SendInput "^!l"
+}
+
+; 
+; CapsLock::LButton     ; 
 
 
 #HotIf WinActive("ahk_exe chrome.exe")
@@ -151,6 +156,9 @@ PgDn::
 }
 PgUp::{
     SendInput "+{F9}"
+}
+RControl::{
+    SendInput "+{F10}"
 }
 #HotIf
 
