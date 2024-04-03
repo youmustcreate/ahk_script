@@ -14,7 +14,7 @@ F3::{
     SendInput "{Alt down}{Tab}{Alt up}"   ; 上一个任务
 }
 
-F4::^f        ; 查找 
+F4::^1        ; 查找 
 
 F5::{
     SendInput "^x"    ;   剪切
@@ -29,7 +29,7 @@ RAlt::{
 +CapsLock::CapsLock
 
 CapsLock::{
-    SendInput "^1"      ;  启动截图， 打开截图
+    SendInput "^f"      ;  启动截图， 打开截图
 }
 
 
