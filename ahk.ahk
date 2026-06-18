@@ -93,8 +93,6 @@ PgDn::Send("{Enter}")
 
 
 
-
-
 ; ==================== 全局双击 Esc 关闭窗口 ====================
 ~Esc:: {
     static winc_presses := 0
@@ -112,83 +110,135 @@ PgDn::Send("{Enter}")
 }
 
 
+; ============================================================
+;  屏幕热区 · 数据驱动版
+;  ・所有坐标使用 AHK 原生体系：左上角为原点，Y 轴向下
+;  ・新增 / 删除 / 修改热区只需编辑下方的 zones 数组
+; ============================================================
 
-SetTimer CheckScreenCorners, 50
+CornerSize := 3   ; 角落热区边长（像素）
+OverlayW   := 5    ; 边缘标记条宽度（像素）
+W          := A_ScreenWidth
+H          := A_ScreenHeight
 
-CheckScreenCorners() {
-    static BR_Triggered          := false        ; 右下角触发标记
-    static TL_Triggered          := false        ; 左上角触发标记
-    static TR_Top3rd_Triggered   := false        ; 右边上三分之一触发标记
-    static L_Top3rd_Triggered    := false        ; 左边上三分之一触发标记
-    static L_Bottom3rd_Triggered := false        ;  
-    static L_B3rd_Triggered      := false        ;  
-    CoordMode "Mouse", "Screen"
-    
-    try {
-        MouseGetPos(&mx, &my)
+; ============================================================
+;  热区配置表
+;  x1/y1 ── 热区左上角坐标
+;  x2/y2 ── 热区右下角坐标（含边界）
+;  color  ── 标记窗口背景色（十六进制 RGB）
+;  label  ── 调试用说明
+;  action ── 鼠标进入热区时执行的操作
+; ============================================================
+zones := [
+    ; ── 四个角落 ────────────────────────────────────────────
+    { key:"TL",
+      x1:0,            y1:0,            x2:CornerSize-1,  y2:CornerSize-1,
+      color:"06c2f6",  label:"左上角（F9）",
+      action:() => Send("{F9}") },
 
-        ; 左上角检测 (触发 F9)
-        if (mx <= 0 && my <= 0) {
-            if (!TL_Triggered) {
-                Send("{F9}")              
-                TL_Triggered := true
-            }
-        } else {
-            TL_Triggered := false
-        }
-        
-        ; 右下角检测 (触发多任务界面 Ctrl+Alt+Tab)
-        if (mx >= A_ScreenWidth - 1 && my >= A_ScreenHeight - 1) {
-            if (!BR_Triggered) {
-                Send("^!{Tab}")           
-                BR_Triggered := true
-            }
-        } else {
-            BR_Triggered := false
-        }
-        
+    { key:"TR",
+      x1:W-CornerSize, y1:0,            x2:W-1,           y2:CornerSize-1,
+      color:"06c2f6",  label:"右上角（Ctrl+Alt+Shift+I）",
+      action:() => Send("^!+i") },
 
-        ; 右上四分之一边缘检测 (触发 Alt+Tab)
-        if (mx >= A_ScreenWidth - 1 && my >= 80 && my <= A_ScreenHeight / 4) {
-            if (!TR_Top3rd_Triggered) {
-                Send("!{Tab}")
-                TR_Top3rd_Triggered := true
-            }
-        } else {
-            TR_Top3rd_Triggered := false
-        }
+    { key:"BR",
+      x1:W-CornerSize, y1:H-CornerSize, x2:W-1,           y2:H-1,
+      color:"06c2f6",  label:"右下角（Win+Tab）",
+      action:() => Send("#{Tab}") },
 
-        ; X在最左侧边缘，且Y在 20 到 屏幕总高度/4 之间
-        if (mx <= 0 && my >= 80 && my <= A_ScreenHeight / 4) {
-            if (!L_Top3rd_Triggered) {
-                Run("./c.exe")
-                L_Top3rd_Triggered := true
-            }
-        } else {
-            L_Top3rd_Triggered := false
-        }
+    { key:"BL",
+      x1:0,            y1:H-CornerSize, x2:CornerSize-1,  y2:H-1,
+      color:"06c2f6",  label:"左下角（Win+D）",
+      action:() => Send("#d") },
 
-        ; X左下
-        if (mx <= 0 && my >= A_ScreenHeight - 1) {
-            if (!L_Bottom3rd_Triggered) {
-                Send("#d")   ;显示桌面
-                L_Bottom3rd_Triggered := true
-            }
-        } else {
-            L_Bottom3rd_Triggered := false
-        }
+    ; ── 三个边缘区域 ─────────────────────────────────────────
+    { key:"RE",
+      x1:W-OverlayW,   y1:80,           x2:W-1,           y2:H//4,
+      color:"34f404",  label:"右边缘上区（Alt+Tab）",
+      action:() => Send("!{Tab}") },
 
-        ; X左下
-        if (mx <= 0 && my >= A_ScreenHeight - A_ScreenHeight/4  && my <= A_ScreenHeight - 80) {
-            if (!L_B3rd_Triggered) {
-                Send "{LWin}"
-                L_B3rd_Triggered := true
-            }
-        } else {
-            L_B3rd_Triggered := false
-        }
+    { key:"LM",
+      x1:0,            y1:H//6-40,      x2:OverlayW-1,    y2:H//6,
+      color:"37ca2a",  label:"左边缘中上区（启动 c.exe）",
+      action:() => Run("./c.exe") },
 
-    }
+    { key:"LB",
+      x1:0,            y1:H*5//6,       x2:OverlayW-1,    y2:H*6//7,
+      color:"00FF88",  label:"左边缘中下区（Win 键）",
+      action:() => Send("{LWin}") },
+
+    { key:"RD",
+      x1:W-OverlayW,   y1:H//2+1,       x2:W-1,           y2:H*2//3,
+      color:"FF8800",  label:"右边缘中区（切换右桌面）",
+      action:() => Send("^#{Right}") },
+
+    { key:"LD",
+      x1:0,            y1:H//4+1,       x2:OverlayW-1,    y2:H//2,
+      color:"FF8800",  label:"左边缘中区（切换左桌面）",
+      action:() => Send("^#{Left}") }
+]
+
+; ============================================================
+;  工厂函数：统一创建标记 GUI
+; ============================================================
+CreateOverlay(x, y, w, h, color) {
+    ov := Gui()
+    ov.Opt("-Caption +ToolWindow +AlwaysOnTop +E0x20")
+    ov.BackColor := color
+    WinSetTransparent(120, ov)
+    ov.Show("x" x " y" y " w" w " h" h " NoActivate")
+    return ov
 }
 
+; ── 批量创建所有标记窗口，并用实际渲染位置覆盖触发坐标 ──────
+for z in zones {
+    z.overlay := CreateOverlay(
+        z.x1, z.y1,
+        z.x2 - z.x1 + 1,
+        z.y2 - z.y1 + 1,
+        z.color
+    )
+    ; 读回 overlay 实际可见物理坐标，同步给触发区域
+    rc := Buffer(16)
+    DllCall("dwmapi\DwmGetWindowAttribute",
+        "Ptr",  z.overlay.Hwnd,
+        "UInt", 9,          ; DWMWA_EXTENDED_FRAME_BOUNDS
+        "Ptr",  rc,
+        "UInt", 16)
+    z.x1 := NumGet(rc,  0, "Int")
+    z.y1 := NumGet(rc,  4, "Int")
+    z.x2 := NumGet(rc,  8, "Int") - 1   ; right 是开区间，减 1 变闭区间
+    z.y2 := NumGet(rc, 12, "Int") - 1
+}
 
+; ============================================================
+;  定时器：每 30ms 轮询鼠标位置，遍历配置表统一判断
+; ============================================================
+SetTimer CheckZones, 50
+
+CheckZones() {
+    global zones
+    static triggered := Map()
+
+    CoordMode "Mouse", "Screen"
+    try {
+        MouseGetPos(&mx, &my)
+        for i, z in zones {
+            hit    := (mx >= z.x1 && mx <= z.x2 && my >= z.y1 && my <= z.y2)
+            wasHit := triggered.Get(i, false)
+            if hit && !wasHit {
+                fn := z.action   ; ← 脱离对象上下文再调用
+                fn()
+                triggered[i] := true
+            } else if !hit && wasHit {
+                triggered[i] := false
+            }
+        }
+    } catch as e {
+        FileAppend(
+            FormatTime(A_Now, "yyyy-MM-dd HH:mm:ss")
+                " [" e.What "] " e.Message "`n",
+            A_ScriptDir "\hotzone_err.log"
+        )
+    }
+}
